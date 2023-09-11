@@ -20,8 +20,8 @@ export default function STTComponent() {
       };
 
       mediaRecorder.current.onstop = () => {
-        const blob = new Blob(recordedChunks.current, { type: "audio/webm" });
-        const file = new File([blob], "audio.webm");
+        const blob = new Blob(recordedChunks.current, { type: "audio/mp4" });
+        const file = new File([blob], "audio.mp4");
 
         setLoading(true);
         transcribeAudio(file).then((data) => {
