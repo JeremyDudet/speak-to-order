@@ -9,6 +9,13 @@ export default function STTComponent() {
   const recordedChunks = useRef([]);
 
   const handleStartRecording = () => {
+    if (typeof MediaRecorder === "undefined") {
+      alert(
+        "Your browser does not support the MediaRecorder API. Please try using a different browser."
+      );
+      return;
+    }
+
     navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
       mediaRecorder.current = new MediaRecorder(stream);
       mediaRecorder.current.start();
