@@ -6,8 +6,8 @@ export default function STTComponent() {
   const [recording, setRecording] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null); // Add an error state
   const mediaRecorder = useRef(null);
-  const recordedChunks = useRef([]);
 
   const handleStartRecording = () => {
     navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
@@ -51,6 +51,7 @@ export default function STTComponent() {
       return response.data;
     } catch (error) {
       console.error(error);
+      setError("An error occurred while transcribing the audio."); // Set the error state
     }
   }
 
@@ -62,6 +63,7 @@ export default function STTComponent() {
         <button onClick={handleStartRecording}>Start Recording</button>
       )}
       {loading ? <p>Loading...</p> : <p>{JSON.stringify(transcript)}</p>}
+      {error && <p className="text-red-500 text-lg font-bold">{error}</p>}{" "}
     </div>
   );
 }
