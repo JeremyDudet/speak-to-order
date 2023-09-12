@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import axios from "axios";
+import RecordRTC from "recordrtc";
 
 export default function STTComponent() {
   const [recording, setRecording] = useState(false);
@@ -9,43 +10,27 @@ export default function STTComponent() {
   const recordedChunks = useRef([]);
 
   const handleStartRecording = () => {
-    if (typeof MediaRecorder === "undefined") {
-      alert(
-        "Your browser does not support the MediaRecorder API. Please try using a different browser."
-      );
-      return;
-    }
-
     navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-      mediaRecorder.current = new MediaRecorder(stream);
-      mediaRecorder.current.start();
-
-      mediaRecorder.current.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          recordedChunks.current.push(e.data);
-        }
-      };
-
-      mediaRecorder.current.onstop = () => {
-        const blob = new Blob(recordedChunks.current, { type: "audio/mp3" });
-        const file = new File([blob], "audio.mp3");
-
-        setLoading(true);
-        transcribeAudio(file).then((data) => {
-          setTranscript(data);
-          setLoading(false);
-        });
-
-        recordedChunks.current = [];
-      };
-
+      mediaRecorder.current = RecordRTC(stream, { type: "audio" });
+      mediaRecorder.current.startRecording();
       setRecording(true);
     });
   };
 
   const handleStopRecording = () => {
-    mediaRecorder.current.stop();
-    setRecording(false);
+    mediaRecorder.current.stopRecording(() => {
+      const blob = mediaRecorder.current.getBlob();
+      const file = new File([blob], "audio.mp3");
+
+      setLoading(true);
+      transcribeAudio(file).then((data) => {
+        setTranscript(data);
+        setLoading(false);
+      });
+
+      mediaRecorder.current.reset();
+      setRecording(false);
+    });
   };
 
   async function transcribeAudio(audioFile) {
