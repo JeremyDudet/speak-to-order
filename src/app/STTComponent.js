@@ -27,8 +27,8 @@ export default function STTComponent() {
       };
 
       mediaRecorder.current.onstop = () => {
-        const blob = new Blob(recordedChunks.current, { type: "audio/mpeg" });
-        const file = new File([blob], "audio.mpeg");
+        const blob = new Blob(recordedChunks.current, { type: "audio/m4a" });
+        const file = new File([blob], "audio.m4a");
 
         setLoading(true);
         transcribeAudio(file).then((data) => {
