@@ -9,7 +9,9 @@ const STTComponent = dynamic(() => import("./STTComponent"), {
 
 export default function Home() {
   // Check if the browser is not Chrome
-  const isNotChrome = !window.navigator.userAgent.includes("Chrome");
+  const isNotChrome =
+    typeof window !== "undefined" &&
+    !window.navigator.userAgent.includes("Chrome");
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24 relative bg-gray-100 dark:bg-gray-900">
