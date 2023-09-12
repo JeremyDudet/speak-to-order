@@ -58,12 +58,32 @@ export default function STTComponent() {
   return (
     <div>
       {recording ? (
-        <button onClick={handleStopRecording}>Stop Recording</button>
+        <button
+          className="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded dark:bg-indigo-800 dark:hover:bg-indigo-900"
+          onClick={handleStopRecording}
+        >
+          Stop Recording
+        </button>
       ) : (
-        <button onClick={handleStartRecording}>Start Recording</button>
+        <button
+          className="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded dark:bg-indigo-800 dark:hover:bg-indigo-900"
+          onClick={handleStartRecording}
+        >
+          Start Recording
+        </button>
       )}
-      {loading ? <p>Loading...</p> : <p>{JSON.stringify(transcript)}</p>}
-      {error && <p className="text-red-500 text-lg font-bold">{error}</p>}{" "}
+      {loading ? (
+        <p className="text-gray-900 dark:text-gray-200">Loading...</p>
+      ) : (
+        <p className="text-gray-900 dark:text-gray-200">
+          {JSON.stringify(transcript)}
+        </p>
+      )}
+      {error && (
+        <p className="text-red-500 text-lg font-bold dark:text-red-300">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
