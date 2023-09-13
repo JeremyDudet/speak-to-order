@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useState, useEffect } from "react";
 import { Transition } from "@headlessui/react";
 
 const STTComponent = dynamic(() => import("./STTComponent"), {
@@ -8,10 +9,18 @@ const STTComponent = dynamic(() => import("./STTComponent"), {
 });
 
 export default function Home() {
-  // Check if the browser is not Chrome
-  const isNotChrome =
-    typeof window !== "undefined" &&
-    !window.navigator.userAgent.includes("Chrome");
+  // Check if the browser is not Chrome or is not Chrome for mobile
+  const [isNotChrome, setIsNotChrome] = useState(false);
+
+  useEffect(() => {
+    // using useEffect to check if this is not Chrome prevents hydration errors. This code will only run on the client.
+    setIsNotChrome(
+      !(
+        window.navigator.userAgent.includes("Chrome") ||
+        window.navigator.userAgent.includes("CriOS")
+      )
+    );
+  }, []);
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24 relative bg-gray-100 dark:bg-gray-900">

@@ -10,23 +10,36 @@ export default function STTComponent() {
   const mediaRecorder = useRef(null);
 
   const handleStartRecording = () => {
-    navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-      mediaRecorder.current = RecordRTC(stream, { type: "audio" });
+    const handleSuccess = (stream) => {
+      mediaRecorder.current = RecordRTC(stream, {
+        type: "audio",
+        mimeType: "audio/wav",
+      });
       mediaRecorder.current.startRecording();
       setRecording(true);
-    });
+    };
+
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      // For newer browsers
+      navigator.mediaDevices.getUserMedia({ audio: true }).then(handleSuccess);
+    } else if (navigator.getUserMedia) {
+      // Fallback for Safari
+      navigator.getUserMedia({ audio: true }, handleSuccess, (error) =>
+        console.error(error)
+      );
+    } else {
+      setError("Your browser does not support audio recording.");
+    }
   };
 
   const handleStopRecording = () => {
-    mediaRecorder.current.stopRecording(() => {
+    mediaRecorder.current.stopRecording(async () => {
       const blob = mediaRecorder.current.getBlob();
-      const file = new File([blob], "audio.mp3");
-
+      const audioFile = new Blob([blob], { type: "audio/wav" });
       setLoading(true);
-      transcribeAudio(file).then((data) => {
-        setTranscript(data);
-        setLoading(false);
-      });
+      const data = await transcribeAudio(audioFile);
+      setTranscript(data);
+      setLoading(false);
 
       mediaRecorder.current.reset();
       setRecording(false);
@@ -37,21 +50,28 @@ export default function STTComponent() {
     const formData = new FormData();
     formData.append("file", audioFile);
     formData.append("model", "whisper-1");
+
     try {
       const response = await axios.post(
         "https://api.openai.com/v1/audio/transcriptions",
         formData,
         {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-          },
+          headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
         }
       );
       return response.data;
     } catch (error) {
-      console.error(error);
-      setError("An error occurred while transcribing the audio."); // Set the error state
+      console.log(error);
+      if (error.response) {
+        console.log(error.response.data);
+        console.log(error.response.status);
+        console.log(error.response.headers);
+      } else if (error.request) {
+        console.log(error.request);
+      } else {
+        console.log("Error", error.message);
+      }
+      setError(error.message);
     }
   }
 
